@@ -78,10 +78,23 @@ ${chatContext}
 User: ${userMessage.text}
 Assistant:`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-      });
+      const callGeminiWithRetry = async (retries = 3) => {
+        try {
+          return await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+          });
+        } catch (error) {
+          if (error.status === 429 && retries > 0) {
+            console.warn(`Rate limit exceeded (429). Retrying in 3 seconds...`);
+            await new Promise(r => setTimeout(r, 3000));
+            return callGeminiWithRetry(retries - 1);
+          }
+          throw error;
+        }
+      };
+
+      const response = await callGeminiWithRetry();
 
       const assistantMessage = {
         id: Date.now() + 1,
