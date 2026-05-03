@@ -81,7 +81,7 @@ Assistant:`;
       const callGeminiWithRetry = async (retries = 3) => {
         try {
           return await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-1.5-flash',
             contents: prompt,
           });
         } catch (error) {
